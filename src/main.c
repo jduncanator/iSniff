@@ -218,16 +218,17 @@ int main (int argc, char *argv[])
 	if(!udid) {
 		idevice_get_udid(device, &udid);
 	}
-
-	if(udid) {
-		fprintf(stderr, "Connected to %s\n", udid);
-		free(udid);
-	}
 	
 	if (LOCKDOWN_E_SUCCESS != lockdownd_client_new_with_handshake(device, &lockdown, "iSniff")) {
 		idevice_free(device);
 		printf("Could not connect to lockdownd.\n");
 		return -1;
+	}
+
+	
+	if(udid) {
+		fprintf(stderr, "Connected to %s\n", udid);
+		free(udid);
 	}
 
 	err = lockdownd_start_service(lockdown, "com.apple.pcapd", &service);
