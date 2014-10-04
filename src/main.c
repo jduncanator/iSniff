@@ -193,6 +193,9 @@ int main (int argc, char *argv[])
 				fprintf(stderr, "[ERROR] Could not get device name!\n");
 				return -2;
 			}
+
+			lockdownd_client_free(lockdown);
+			idevice_free(device);
 			
 			printf("%s - %s\n", devices[i], device_name);
 
@@ -225,7 +228,6 @@ int main (int argc, char *argv[])
 		return -1;
 	}
 
-	
 	if(udid) {
 		fprintf(stderr, "Connected to %s\n", udid);
 		free(udid);
