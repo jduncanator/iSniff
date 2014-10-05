@@ -27,7 +27,7 @@ typedef struct iptap_hdr_t {
 	uint32_t	protocol_family;
 	uint32_t	frame_pre_length;
 	uint32_t	frame_pst_length;
-	char		if_name[sizeof(char) * 16];
+	char		if_name[16];
 } iptap_hdr_t;
 
 #pragma pack(pop)
