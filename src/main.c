@@ -278,7 +278,10 @@ int main (int argc, char *argv[])
 
 		tap_hdr = (iptap_hdr_t*)buff;
 		
-		gettimeofday(&pcap_hdr.ts, NULL);
+		struct timeval ts;
+		gettimeofday(&ts, NULL);
+		pcap_hdr.ts.tv_sec = ts.tv_sec;
+		pcap_hdr.ts.tv_usec = ts.tv_usec;
 		pcap_hdr.caplen = ntohl(tap_hdr->length);
 		pcap_hdr.len = ntohl(tap_hdr->length);
 

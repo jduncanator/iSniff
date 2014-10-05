@@ -13,6 +13,11 @@
 #define PCAP_VERSION_MINOR 4
 #define DLT_EN10MB 1
 
+struct pcap_timeval {
+	int32_t tv_sec;
+	int32_t tv_usec;
+};
+
 struct pcap_file_header {
 	uint32_t magic;
 	uint16_t version_major;
@@ -24,7 +29,7 @@ struct pcap_file_header {
 };
 
 struct pcap_sf_pkthdr {
-    struct timeval ts;	/* time stamp */
+    struct pcap_timeval ts;	/* time stamp */
     uint32_t caplen;	/* length of portion present */
     uint32_t len;		/* length this packet (off wire) */
 };
