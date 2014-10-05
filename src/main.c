@@ -50,6 +50,7 @@ static char quit_flag = 0;
 
 /* 
  * str_is_udid from ideviceinstaller.c
+ * Modified by jduncanator
  * Copyright (C) 2010 Nikias Bassen <nikias@gmx.li>
  * Licensed under the GNU General Public License Version 2
  */
@@ -67,13 +68,8 @@ static int str_is_udid(const char* str)
 	if (length != 40)
 		return -1;
 
-	/* check for invalid characters */
-	while(length--) {
-		/* invalid character in udid? */
-		if (strchr(allowed, str[length]) == NULL) {
-			return -1;
-		}
-	} 
+	if(strspn(str, allowed) != 40)
+		return -1;
 
 	return 0;
 }
