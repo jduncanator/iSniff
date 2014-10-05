@@ -26,7 +26,13 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <signal.h>
-#include <time.h>
+
+#ifdef WIN32
+#include <Winsock2.h>
+#else
+#include <netinet/in.h>
+#include <sys/time.h>
+#endif
 
 #include <plist/plist.h>
 
@@ -35,12 +41,6 @@
 
 #include "pcap.h"
 #include "iftap.h"
-
-#ifdef WIN32
-#include <Winsock2.h>
-#else
-#include <netinet/in.h>
-#endif
 
 char *outfile = NULL;
 char *udid = NULL;
@@ -158,8 +158,7 @@ int main (int argc, char *argv[])
 	lockdownd_service_descriptor_t service = NULL;
 	property_list_service_client_t pcap_client = NULL;
 
-	pcap_t *pd = NULL;
-	pcap_dumper_t *pdumper = NULL;
+	FILE *pd = NULL;
 
 	if(list_udid) {
 		int i;
@@ -249,15 +248,24 @@ int main (int argc, char *argv[])
 		outfile = "-";
 	}
 
-	pd = pcap_open_dead(DLT_EN10MB, 65535);
-	pdumper = pcap_dump_open(pd, outfile);
+	if(outfile[0] == '-' && outfile[1] == '\0') {
+		pd = stdout;
+	} else {
+		#ifndef WIN32
+			pd = fopen(outfile, "w");
+		#else
+			pd = fopen(outfile, "wb");
+		#endif
+	}
 
-	plist_t result = NULL;
-	iptap_hdr_t *tap_hdr = NULL;
-	struct pcap_pkthdr pcap_hdr;
+	pcap_write_header(pd, DLT_EN10MB, 65535);
 
 	signal(SIGINT, handle_interrupt);
 	signal(SIGTERM, handle_interrupt);
+
+	plist_t result = NULL;
+	iptap_hdr_t *tap_hdr = NULL;
+	struct pcap_sf_pkthdr pcap_hdr;
 
 	while(1) {
 		property_list_service_receive_plist(pcap_client, &result);
@@ -273,16 +281,15 @@ int main (int argc, char *argv[])
 		pcap_hdr.caplen = ntohl(tap_hdr->length);
 		pcap_hdr.len = ntohl(tap_hdr->length);
 
-		pcap_dump((char*)pdumper, &pcap_hdr, (buff + ntohl(tap_hdr->hdr_length)));
-		pcap_dump_flush(pdumper);
+		pcap_write_packet(pd, &pcap_hdr, (buff + ntohl(tap_hdr->hdr_length)));
+		fflush(pd);
 
 		free(buff);
 
 		if(quit_flag) break;
 	}
 
-	pcap_close(pd);
-	pcap_dump_close(pdumper);
+	fclose(pd);
 	property_list_service_client_free(pcap_client);
 	idevice_free(device);
 
