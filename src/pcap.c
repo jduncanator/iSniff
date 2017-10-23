@@ -24,4 +24,5 @@ int pcap_write_packet(FILE *fp, const struct pcap_sf_pkthdr *hdr, const char *sp
 {
 	(void)fwrite(hdr, sizeof(struct pcap_sf_pkthdr), 1, fp);
 	(void)fwrite(sp, hdr->caplen, 1, fp);
+	return 0;
 }

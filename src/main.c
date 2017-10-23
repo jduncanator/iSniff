@@ -276,6 +276,9 @@ int main (int argc, char *argv[])
 		plist_get_data_val(result, &buff, &length);
 		plist_free(result);
 
+		if (!buff) {
+			break;
+		}
 		tap_hdr = (iptap_hdr_t*)buff;
 		
 		struct timeval ts;
